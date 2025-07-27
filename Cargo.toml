@@ -1,0 +1,63 @@
+[package]
+name = "book-recommendation-backend"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Web Framework
+actix-web = "4.11"
+actix-multipart = "0.7.2"
+actix-cors = "0.7.1"
+
+# Async Runtime
+tokio = { version = "1.47", features = ["full"] }
+
+# Database
+surrealdb = { version = "2.3.7", features = ["kv-rocksdb"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Authentication
+jsonwebtoken = "9.3"
+bcrypt = "0.17"
+uuid = { version = "1.17", features = ["v4", "serde"] }
+
+# Configuration
+config = "0.15.13"
+dotenv = "0.15"
+
+# Error Handling
+anyhow = "1.0"
+thiserror = "2.0.12"
+
+# Validation
+validator = { version = "0.20.0", features = ["derive"] }
+
+# HTTP Client (for Cloudinary)
+reqwest = { version = "0.12.22", features = ["json", "multipart"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-actix-web = "0.7"
+
+# OpenAPI/Swagger
+utoipa = { version = "5.4.0", features = ["actix_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
+
+# Python Integration
+pyo3 = { version = "0.25.1", features = ["auto-initialize"] }
+
+# Dependency Injection
+shaku = "0.6"
+
+# Base64 encoding
+base64 = "0.22.1"
+
+# Image processing
+image = "0.25.6"
