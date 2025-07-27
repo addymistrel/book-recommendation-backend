@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_DATABASE__URL=ws://surrealdb:8000
+      - APP_DATABASE__NAMESPACE=book_rec
+      - APP_DATABASE__DATABASE=main
+      - APP_JWT__SECRET=${JWT_SECRET:-your-jwt-secret-here}
+      - APP_JWT__EXPIRATION_HOURS=24
+      - APP_CLOUDINARY__CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - APP_CLOUDINARY__API_KEY=${CLOUDINARY_API_KEY}
+      - APP_CLOUDINARY__API_SECRET=${CLOUDINARY_API_SECRET}
+      - APP_CLOUDINARY__UPLOAD_PRESET=${CLOUDINARY_UPLOAD_PRESET}
+      - APP_ML_MODEL__MODEL_PATH=/app/models/recommendation_model.pkl
+      - APP_ML_MODEL__PYTHON_PATH=/app/python_models
+      - APP_SERVER__HOST=0.0.0.0
+      - APP_SERVER__PORT=8080
+    volumes:
+      - ./models:/app/models:ro
+      - ./python_models:/app/python_models:ro
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - surrealdb
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    ports:
+      - "8000:8000"
+    command: start --log trace --user root --pass root file:///data/book_rec.db
+    volumes:
+      - surrealdb_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  surrealdb_data:
+  redis_data:
